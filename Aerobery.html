@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Code Library - Ultimate Aero Edition</title>
+    <style>
+        :root {
+            /* Light Theme - Deep Vibrant Water/Sky */
+            --bg-base: #87cefa;
+            --orb-1: #c2e9ff;
+            --orb-2: #3a9fff;
+            --orb-3: #90e0ef;
+            --glass-bg: rgba(255, 255, 255, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.9);
+            --glass-highlight: inset 0 1px 1px rgba(255, 255, 255, 1), inset 0 10px 20px rgba(255, 255, 255, 0.3);
+            --glass-shadow: 0 12px 40px 0 rgba(0, 90, 180, 0.2);
+            --text-main: #061c33;
+            --text-muted: #2c4d6e;
+            --btn-base: #4dabf5;
+            --btn-run: #34c759;
+            --btn-danger: #ff5f56;
+            --btn-text: #002855;
+            --item-hover: rgba(255, 255, 255, 0.5);
+            --item-active: rgba(255, 255, 255, 0.85);
+            --input-bg: rgba(255, 255, 255, 0.5);
+            --menu-bg: rgba(240, 248, 255, 0.9);
+        }
+
+        [data-theme="dark"] {
+            /* Dark Theme - Midnight Aurora */
+            --bg-base: #0b1421;
+            --orb-1: #1e456e;
+            --orb-2: #071f3b;
+            --orb-3: #005f73;
+            --glass-bg: rgba(10, 18, 30, 0.5);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --glass-highlight: inset 0 1px 1px rgba(255, 255, 255, 0.1), inset 0 10px 20px rgba(255, 255, 255, 0.05);
+            --glass-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.7);
+            --text-main: #dcf0ff;
+            --text-muted: #799bbb;
+            --btn-base: #144980;
+            --btn-run: #1c7230;
+            --btn-danger: #9e2323;
+            --btn-text: #ffffff;
+            --item-hover: rgba(255, 255, 255, 0.08);
+            --item-active: rgba(255, 255, 255, 0.15);
+            --input-bg: rgba(0, 0, 0, 0.4);
+            --menu-bg: rgba(15, 25, 40, 0.9);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Segoe UI", Frutiger, "Frutiger Linotype", Tahoma, sans-serif; }
+        
+        body { 
+            display: flex; height: 100vh; background-color: var(--bg-base); color: var(--text-main); 
+            transition: background-color 0.8s ease; overflow: hidden; position: relative;
+        }
+
+        /* --- FRUTIGER AERO BACKGROUND DECORATIONS --- */
+        .aero-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; overflow: hidden; pointer-events: none; }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.8; transition: background 0.8s ease; }
+        .orb-1 { width: 600px; height: 600px; background: var(--orb-1); top: -150px; left: -100px; }
+        .orb-2 { width: 700px; height: 700px; background: var(--orb-2); bottom: -200px; right: -150px; }
+        .orb-3 { width: 500px; height: 500px; background: var(--orb-3); top: 20%; left: 40%; opacity: 0.5; }
+        
+        .bubble {
+            position: absolute; border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.9), rgba(255,255,255,0.1) 60%, rgba(255,255,255,0.5) 100%);
+            box-shadow: inset 0 0 15px rgba(255,255,255,0.8), 0 5px 15px rgba(0,0,0,0.1);
+            animation: float ease-in-out infinite alternate; opacity: 0.7;
+        }
+        [data-theme="dark"] .bubble { opacity: 0.15; }
+        .b1 { width: 120px; height: 120px; bottom: 10%; left: 5%; animation-duration: 8s; }
+        .b2 { width: 60px; height: 60px; top: 20%; right: 15%; animation-duration: 6s; animation-delay: 1s; }
+        .b3 { width: 90px; height: 90px; bottom: 30%; right: 5%; animation-duration: 10s; animation-delay: 2s; }
+        
+        @keyframes float { 0% { transform: translateY(0) scale(1); } 100% { transform: translateY(-30px) scale(1.05); } }
+
+        /* --- GLASS & UI --- */
+        .glass { 
+            background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); 
+            border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow), var(--glass-highlight); 
+        }
+
+        /* Sidebar & Main */
+        .sidebar { width: 300px; display: flex; flex-direction: column; margin: 15px; border-radius: 12px; overflow: hidden; z-index: 10; flex-shrink: 0; }
+        .sidebar-header { padding: 15px; border-bottom: 1px solid var(--glass-border); display: flex; gap: 10px; background: linear-gradient(180deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%); }
+        .snippet-list { flex-grow: 1; overflow-y: auto; list-style: none; padding: 10px; }
+        .snippet-item { padding: 10px 12px; margin-bottom: 5px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: 0.2s; border: 1px solid transparent; display: flex; justify-content: space-between; align-items: center; user-select: none; }
+        .snippet-item:hover { background-color: var(--item-hover); }
+        .snippet-item.active { background-color: var(--item-active); border: 1px solid var(--glass-border); box-shadow: 0 2px 5px rgba(0,0,0,0.05); text-shadow: 0 1px 2px rgba(255,255,255,0.5); }
+        [data-theme="dark"] .snippet-item.active { text-shadow: none; }
+        .snippet-item.drag-over { border-top: 2px solid var(--btn-base); }
+        .pin-icon { font-size: 12px; opacity: 0.8; }
+
+        /* Extra Glossy Buttons */
+        .btn { 
+            padding: 8px 15px; font-size: 13px; font-weight: bold; cursor: pointer; border-radius: 20px; 
+            color: var(--btn-text); 
+            background: linear-gradient(180deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.2) 45%, rgba(0,0,0,0.05) 50%, rgba(0,0,0,0.15) 100%), var(--btn-base); 
+            border: 1px solid var(--glass-border); box-shadow: inset 0 2px 2px rgba(255,255,255,0.8), 0 2px 5px rgba(0,0,0,0.2); 
+            text-shadow: 0 1px 1px rgba(255,255,255,0.5); transition: all 0.2s ease; white-space: nowrap; 
+        }
+        [data-theme="dark"] .btn { text-shadow: 0 1px 1px rgba(0,0,0,0.6); box-shadow: inset 0 1px 1px rgba(255,255,255,0.3), 0 2px 5px rgba(0,0,0,0.4); }
+        .btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+        .btn:active { filter: brightness(0.9); transform: translateY(1px); box-shadow: inset 0 3px 6px rgba(0,0,0,0.3); }
+        .btn-primary { flex-grow: 1; }
+        .btn-run { background: linear-gradient(180deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.2) 45%, rgba(0,0,0,0.05) 50%, rgba(0,0,0,0.15) 100%), var(--btn-run); color: white; text-shadow: 0 1px 1px rgba(0,0,0,0.5); }
+        .btn-icon { width: 36px; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+
+        .main-content { flex-grow: 1; display: flex; flex-direction: column; margin: 15px 15px 15px 0; border-radius: 12px; padding: 20px; z-index: 10; min-width: 0; }
+        .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        
+        .title-input { 
+            font-size: 22px; font-weight: bold; padding: 10px 15px; border: 1px solid var(--glass-border); 
+            border-radius: 8px; background: var(--input-bg); color: var(--text-main); width: 40%; outline: none; 
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); transition: all 0.3s; 
+        }
+        .title-input:focus { box-shadow: inset 0 2px 4px rgba(0,0,0,0.1), 0 0 10px rgba(255,255,255,0.8); background: rgba(255,255,255,0.8); }
+        [data-theme="dark"] .title-input:focus { background: rgba(0,0,0,0.6); }
+
+        .toolbar-actions { display: flex; gap: 10px; align-items: center; }
+        #saveStatus { font-size: 13px; color: var(--text-muted); margin-left: 10px; opacity: 0; transition: opacity 0.3s; font-weight: bold; white-space: nowrap; }
+
+        /* Stats Counter Badge */
+        .stat-count { 
+            font-size: 12px; color: var(--text-muted); margin-right: 5px; font-family: Consolas, monospace; 
+            background: rgba(255,255,255,0.5); padding: 6px 12px; border-radius: 20px; 
+            border: 1px solid var(--glass-border); box-shadow: inset 0 1px 2px rgba(255,255,255,0.8); 
+            white-space: nowrap; font-weight: 600;
+        }
+        [data-theme="dark"] .stat-count { background: rgba(0,0,0,0.3); color: var(--text-main); box-shadow: inset 0 1px 2px rgba(255,255,255,0.1); }
+
+        .editor-container { flex-grow: 1; display: flex; border-radius: 8px; overflow: hidden; border: 1px solid var(--glass-border); background: var(--input-bg); box-shadow: inset 0 2px 8px rgba(0,0,0,0.1); }
+        .line-numbers { padding: 15px 10px; font-family: Consolas, monospace; font-size: 15px; line-height: 1.6; text-align: right; background: rgba(0,0,0,0.05); border-right: 1px solid var(--glass-border); color: var(--text-muted); user-select: none; overflow-y: hidden; min-width: 45px; }
+        
+        .editor-textarea { 
+            flex-grow: 1; height: 100%; padding: 15px; font-family: Consolas, monospace; font-size: 15px; 
+            line-height: 1.6; border: none; resize: none; outline: none; background: transparent; 
+            color: var(--text-main); white-space: pre; overflow-x: auto; 
+        }
+
+        /* Window Manager UI */
+        .preview-window {
+            position: fixed; display: flex; flex-direction: column; z-index: 2000; border-radius: 12px; 
+            box-shadow: 0 15px 50px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.7);
+            border: 1px solid var(--glass-border); transition: width 0.3s ease, height 0.3s ease, top 0.3s ease, left 0.3s ease;
+            resize: both; overflow: hidden; min-width: 250px; min-height: 150px;
+        }
+        .preview-window.dragging { transition: none; opacity: 0.95; }
+        .preview-window.maximized { top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; border-radius: 0; resize: none; }
+        
+        .preview-header {
+            padding: 10px 15px; background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.2) 100%);
+            display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--glass-border); 
+            cursor: grab; user-select: none; font-weight: bold; font-size: 14px; text-shadow: 0 1px 1px rgba(255,255,255,0.5);
+        }
+        [data-theme="dark"] .preview-header { text-shadow: 0 1px 1px rgba(0,0,0,0.8); }
+        .preview-header:active { cursor: grabbing; }
+        .window-controls { display: flex; gap: 8px; }
+        .win-btn { width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.3); cursor: pointer; box-shadow: inset 0 3px 4px rgba(255,255,255,0.6), 0 1px 2px rgba(0,0,0,0.2); }
+        .win-close { background: #ff5f56; } .win-min { background: #ffbd2e; } .win-max { background: #27c93f; }
+        
+        .iframe-container { position: relative; flex-grow: 1; width: 100%; height: 100%; }
+        .iframe-shield { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; display: none; }
+        .preview-window.dragging .iframe-shield, .preview-window:active .iframe-shield { display: block; }
+        .preview-iframe { border: none; background: white; width: 100%; height: 100%; position: absolute; }
+
+        /* Taskbar */
+        .taskbar {
+            position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 10px; padding: 10px 20px; border-radius: 20px; z-index: 1500;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s;
+            background: rgba(255, 255, 255, 0.3); border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2), inset 0 1px 2px rgba(255,255,255,0.8);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+        }
+        [data-theme="dark"] .taskbar { background: rgba(0, 0, 0, 0.4); }
+        .taskbar.visible { opacity: 1; pointer-events: auto; }
+        .taskbar-btn { 
+            padding: 8px 18px; color: var(--text-main); border: 1px solid var(--glass-border); border-radius: 15px; 
+            cursor: pointer; font-size: 13px; font-weight: bold; background: rgba(255,255,255,0.5);
+            box-shadow: inset 0 1px 1px rgba(255,255,255,0.8); transition: 0.2s;
+        }
+        [data-theme="dark"] .taskbar-btn { background: rgba(255,255,255,0.1); color: white; }
+        .taskbar-btn:hover { background: rgba(255,255,255,0.8); transform: translateY(-2px); }
+        [data-theme="dark"] .taskbar-btn:hover { background: rgba(255,255,255,0.2); }
+
+        /* Context Menu */
+        .context-menu { position: absolute; display: none; flex-direction: column; background: var(--menu-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 8px; box-shadow: var(--glass-shadow); padding: 5px; z-index: 3000; min-width: 160px; }
+        .context-item { padding: 8px 12px; font-size: 13px; font-weight: 600; cursor: pointer; border-radius: 4px; display: flex; align-items: center; gap: 8px; }
+        .context-item:hover { background: rgba(255,255,255,0.4); }
+        [data-theme="dark"] .context-item:hover { background: rgba(255,255,255,0.1); }
+        .context-divider { height: 1px; background: var(--glass-border); margin: 4px 0; }
+        .context-danger { color: var(--btn-danger); }
+
+        /* Frutiger Glass Scrollbars */
+        ::-webkit-scrollbar { width: 12px; height: 12px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); border-radius: 10px; box-shadow: inset 0 0 5px rgba(0,0,0,0.1); }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(90deg, rgba(255,255,255,0.5), rgba(0,0,0,0.1)); border-radius: 10px; border: 1px solid var(--glass-border); }
+        ::-webkit-scrollbar-thumb:hover { background: linear-gradient(90deg, rgba(255,255,255,0.7), rgba(0,0,0,0.2)); }
+    </style>
+</head>
+<body>
+
+    <div class="aero-bg">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+        <div class="bubble b1"></div>
+        <div class="bubble b2"></div>
+        <div class="bubble b3"></div>
+    </div>
+
+    <div class="sidebar glass">
+        <div class="sidebar-header">
+            <button class="btn btn-primary" onclick="createNewSnippet()">+ New Snippet</button>
+            <button class="btn btn-icon" id="themeToggle" onclick="toggleTheme()" title="Toggle Dark/Light Mode">🌙</button>
+        </div>
+        <ul class="snippet-list" id="snippetList"></ul>
+    </div>
+
+    <div class="main-content glass">
+        <div class="toolbar">
+            <div style="width: 40%; display: flex; align-items: center;">
+                <input type="text" id="snippetTitle" class="title-input" placeholder="Name your snippet..." oninput="autoSave()" spellcheck="false" style="width: 100%;">
+                <span id="saveStatus">Saved! ✨</span>
+            </div>
+            <div class="toolbar-actions">
+                <span class="stat-count" id="codeStats">0 lines | 0 chars</span>
+                <button class="btn" onclick="selectAllCode()">⬚ Select All</button>
+                <button class="btn btn-run" onclick="spawnPreview()">▶️ Run Code</button>
+                <button class="btn" onclick="copyCode()">📋 Copy</button>
+            </div>
+        </div>
+        <div class="editor-container">
+            <div id="lineNumbers" class="line-numbers">1</div>
+            <textarea id="codeEditor" class="editor-textarea" placeholder="Paste or type HTML/CSS/JS here..." oninput="handleCodeInput()" wrap="off" spellcheck="false"></textarea>
+        </div>
+    </div>
+
+    <div id="taskbar" class="taskbar"></div>
+    <div id="customContextMenu" class="context-menu"></div>
+
+    <script>
+        let snippets = JSON.parse(localStorage.getItem('myCodeLibrary')) || [];
+        let currentSnippetId = null;
+        let rightClickedSnippetId = null;
+        let activeWindows = {}; 
+        let windowCounter = 0;
+        let zIndexCounter = 2000;
+
+        const snippetListEl = document.getElementById('snippetList');
+        const titleInput = document.getElementById('snippetTitle');
+        const codeEditor = document.getElementById('codeEditor');
+        const lineNumbersEl = document.getElementById('lineNumbers');
+        const codeStatsEl = document.getElementById('codeStats');
+        const saveStatus = document.getElementById('saveStatus');
+        const contextMenu = document.getElementById('customContextMenu');
+        const taskbar = document.getElementById('taskbar');
+
+        function init() {
+            initTheme();
+            if (snippets.length === 0) createNewSnippet();
+            else { renderSidebar(); loadSnippet(snippets[0].id); }
+        }
+
+        function initTheme() {
+            const savedTheme = localStorage.getItem('aeroTheme') || 'light';
+            document.body.setAttribute('data-theme', savedTheme);
+            document.getElementById('themeToggle').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+        }
+        function toggleTheme() {
+            const newTheme = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            document.body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('aeroTheme', newTheme);
+            document.getElementById('themeToggle').textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        }
+
+        let draggedId = null;
+        function renderSidebar() {
+            snippetListEl.innerHTML = '';
+            snippets.sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0)).forEach((snippet) => {
+                const li = document.createElement('li');
+                li.className = `snippet-item ${snippet.id === currentSnippetId ? 'active' : ''}`;
+                li.innerHTML = `<span>${snippet.title || 'Untitled'}</span> ${snippet.pinned ? '<span class="pin-icon">📌</span>' : ''}`;
+                li.dataset.id = snippet.id;
+                
+                li.onclick = (e) => { if(!e.target.closest('.context-menu')) loadSnippet(snippet.id); };
+                li.draggable = true;
+                li.ondragstart = (e) => { draggedId = snippet.id; };
+                li.ondragover = (e) => { e.preventDefault(); li.classList.add('drag-over'); };
+                li.ondragleave = (e) => { li.classList.remove('drag-over'); };
+                li.ondrop = (e) => {
+                    e.preventDefault(); li.classList.remove('drag-over');
+                    if (draggedId !== snippet.id) reorderSnippets(draggedId, snippet.id);
+                };
+                snippetListEl.appendChild(li);
+            });
+        }
+
+        function reorderSnippets(fromId, toId) {
+            const fromIndex = snippets.findIndex(s => s.id === fromId);
+            const toIndex = snippets.findIndex(s => s.id === toId);
+            const [movedSnippet] = snippets.splice(fromIndex, 1);
+            snippets.splice(toIndex, 0, movedSnippet);
+            saveToStorage(); renderSidebar();
+        }
+
+        function loadSnippet(id) {
+            currentSnippetId = id;
+            const snippet = snippets.find(s => s.id === id);
+            if (snippet) {
+                titleInput.value = snippet.title;
+                codeEditor.value = snippet.code;
+                updateLineNumbers();
+                updateStats();
+                renderSidebar();
+                updateAllPreviews();
+            }
+        }
+
+        function createNewSnippet() {
+            const newSnippet = { id: Date.now().toString(), title: 'Untitled Snippet', code: '', pinned: false };
+            snippets.unshift(newSnippet);
+            loadSnippet(newSnippet.id);
+            saveToStorage();
+        }
+
+        function handleCodeInput() {
+            updateLineNumbers();
+            updateStats();
+            autoSave();
+            updateAllPreviews();
+        }
+
+        function updateLineNumbers() {
+            const lines = codeEditor.value.split('\n').length;
+            let lineString = '';
+            for (let i = 1; i <= lines; i++) lineString += i + '<br>';
+            lineNumbersEl.innerHTML = lineString;
+        }
+
+        // NEW: Live Stats Update Function
+        function updateStats() {
+            const code = codeEditor.value;
+            const lines = code.split('\n').length;
+            const chars = code.length;
+            codeStatsEl.textContent = `${lines} ${lines === 1 ? 'line' : 'lines'} | ${chars} ${chars === 1 ? 'char' : 'chars'}`;
+        }
+
+        // NEW: Select All Function
+        function selectAllCode() {
+            codeEditor.focus();
+            codeEditor.select();
+        }
+
+        codeEditor.addEventListener('scroll', () => { lineNumbersEl.scrollTop = codeEditor.scrollTop; });
+        codeEditor.addEventListener('keydown', function(e) {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                const start = this.selectionStart, end = this.selectionEnd;
+                this.value = this.value.substring(0, start) + "    " + this.value.substring(end);
+                this.selectionStart = this.selectionEnd = start + 4;
+                handleCodeInput();
+            }
+        });
+
+        let saveTimeout;
+        function autoSave() {
+            if (!currentSnippetId) return;
+            const snippet = snippets.find(s => s.id === currentSnippetId);
+            if (snippet) {
+                snippet.title = titleInput.value;
+                snippet.code = codeEditor.value;
+                saveToStorage();
+                
+                const activeLi = document.querySelector(`.snippet-item[data-id="${currentSnippetId}"] span`);
+                if(activeLi) activeLi.textContent = titleInput.value || 'Untitled Snippet';
+
+                clearTimeout(saveTimeout);
+                saveStatus.style.opacity = 1;
+                saveTimeout = setTimeout(() => saveStatus.style.opacity = 0, 1500);
+            }
+        }
+        function saveToStorage() { localStorage.setItem('myCodeLibrary', JSON.stringify(snippets)); }
+
+        function spawnPreview() {
+            windowCounter++;
+            const winId = 'window-' + Date.now();
+            const titleText = titleInput.value || 'Preview ' + windowCounter;
+
+            const w = window.innerWidth * 0.7;
+            const h = window.innerHeight * 0.7;
+            let startTop = (window.innerHeight - h) / 2;
+            let startLeft = (window.innerWidth - w) / 2;
+            const offset = (windowCounter % 5) * 20;
+            startTop += offset; startLeft += offset;
+
+            const winEl = document.createElement('div');
+            winEl.className = 'preview-window glass';
+            winEl.id = winId;
+            winEl.style.width = `${w}px`; winEl.style.height = `${h}px`;
+            winEl.style.top = `${startTop}px`; winEl.style.left = `${startLeft}px`;
+            winEl.style.zIndex = ++zIndexCounter;
+
+            winEl.innerHTML = `
+                <div class="preview-header">
+                    <div class="window-controls">
+                        <div class="win-btn win-close" title="Close"></div>
+                        <div class="win-btn win-min" title="Minimize"></div>
+                        <div class="win-btn win-max" title="Maximize"></div>
+                    </div>
+                    <span>${titleText}</span>
+                    <div style="width: 50px;"></div>
+                </div>
+                <div class="iframe-container">
+                    <div class="iframe-shield"></div>
+                    <iframe class="preview-iframe" srcdoc="${codeEditor.value.replace(/"/g, '&quot;')}"></iframe>
+                </div>
+            `;
+            document.body.appendChild(winEl);
+            activeWindows[winId] = { el: winEl, isMaximized: false, preMaxTop: 0, preMaxLeft: 0, preMaxWidth: 0, preMaxHeight: 0 };
+            winEl.addEventListener('mousedown', () => winEl.style.zIndex = ++zIndexCounter);
+            winEl.querySelector('.win-close').onclick = () => { winEl.remove(); delete activeWindows[winId]; checkTaskbar(); };
+            winEl.querySelector('.win-min').onclick = () => minimizeWindow(winId, titleText);
+            winEl.querySelector('.win-max').onclick = () => toggleMaximize(winId);
+            setupDraggable(winEl);
+        }
+
+        function updateAllPreviews() {
+            Object.values(activeWindows).forEach(winData => {
+                const iframe = winData.el.querySelector('.preview-iframe');
+                if (iframe) iframe.srcdoc = codeEditor.value;
+            });
+        }
+
+        function toggleMaximize(winId) {
+            const winData = activeWindows[winId];
+            const winEl = winData.el;
+            if (!winData.isMaximized) {
+                winData.preMaxTop = winEl.style.top; winData.preMaxLeft = winEl.style.left;
+                winData.preMaxWidth = winEl.style.width; winData.preMaxHeight = winEl.style.height;
+                winEl.classList.add('maximized'); winData.isMaximized = true;
+            } else {
+                winEl.classList.remove('maximized');
+                winEl.style.top = winData.preMaxTop; winEl.style.left = winData.preMaxLeft;
+                winEl.style.width = winData.preMaxWidth; winEl.style.height = winData.preMaxHeight;
+                winData.isMaximized = false;
+            }
+        }
+
+        function minimizeWindow(winId, title) {
+            const winEl = activeWindows[winId].el;
+            winEl.style.display = 'none';
+            const tbBtn = document.createElement('button');
+            tbBtn.className = 'taskbar-btn'; tbBtn.innerText = title;
+            tbBtn.onclick = () => { winEl.style.display = 'flex'; winEl.style.zIndex = ++zIndexCounter; tbBtn.remove(); checkTaskbar(); };
+            taskbar.appendChild(tbBtn); checkTaskbar();
+        }
+
+        function checkTaskbar() { taskbar.classList.toggle('visible', taskbar.children.length > 0); }
+
+        function setupDraggable(winEl) {
+            const header = winEl.querySelector('.preview-header');
+            let isDragging = false, startX, startY, initialTop, initialLeft;
+            header.addEventListener('mousedown', (e) => {
+                if (activeWindows[winEl.id].isMaximized || e.target.classList.contains('win-btn')) return;
+                isDragging = true; winEl.classList.add('dragging');
+                startX = e.clientX; startY = e.clientY;
+                initialTop = parseInt(window.getComputedStyle(winEl).top, 10) || 0;
+                initialLeft = parseInt(window.getComputedStyle(winEl).left, 10) || 0;
+            });
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                e.preventDefault();
+                let newLeft = initialLeft + (e.clientX - startX);
+                let newTop = initialTop + (e.clientY - startY);
+                const maxLeft = window.innerWidth - winEl.offsetWidth + 20; 
+                const maxTop = window.innerHeight - 40; 
+                newLeft = Math.max(-winEl.offsetWidth + 50, Math.min(newLeft, maxLeft));
+                newTop = Math.max(0, Math.min(newTop, maxTop));
+                winEl.style.left = `${newLeft}px`; winEl.style.top = `${newTop}px`;
+            });
+            document.addEventListener('mouseup', () => { if(isDragging) { isDragging = false; winEl.classList.remove('dragging'); } });
+        }
+
+        window.addEventListener('resize', () => {
+            Object.values(activeWindows).forEach(winData => {
+                if(winData.isMaximized) return;
+                const winEl = winData.el; let rect = winEl.getBoundingClientRect();
+                if(rect.bottom > window.innerHeight) winEl.style.top = Math.max(0, window.innerHeight - 100) + 'px';
+                if(rect.right > window.innerWidth) winEl.style.left = Math.max(0, window.innerWidth - winEl.offsetWidth) + 'px';
+            });
+        });
+
+        document.addEventListener('contextmenu', (e) => {
+            if (e.target.closest('.iframe-container') || e.target.closest('.title-input') || e.target.closest('.editor-textarea')) return; 
+            e.preventDefault();
+            const snippetEl = e.target.closest('.snippet-item');
+            contextMenu.innerHTML = ''; 
+            if (snippetEl) {
+                rightClickedSnippetId = snippetEl.dataset.id;
+                const snippet = snippets.find(s => s.id === rightClickedSnippetId);
+                contextMenu.innerHTML = `<div class="context-item" onclick="togglePinContext()">📌 ${snippet.pinned ? 'Unpin' : 'Pin'} Snippet</div><div class="context-item" onclick="duplicateContext()">📄 Duplicate</div><div class="context-divider"></div><div class="context-item context-danger" onclick="deleteContext()">🗑️ Delete</div>`;
+            } else {
+                contextMenu.innerHTML = `<div class="context-item" onclick="createNewSnippet()">➕ New Snippet</div><div class="context-item" onclick="selectAllCode()">⬚ Select All Code</div><div class="context-item" onclick="spawnPreview()">▶️ Run Current Code</div><div class="context-divider"></div><div class="context-item" onclick="toggleTheme()">🌗 Toggle Theme</div>`;
+            }
+            contextMenu.style.top = `${e.pageY}px`; contextMenu.style.left = `${e.pageX}px`; contextMenu.style.display = 'flex';
+        });
+        document.addEventListener('click', () => { contextMenu.style.display = 'none'; });
+
+        function togglePinContext() { const s = snippets.find(s => s.id === rightClickedSnippetId); if (s) { s.pinned = !s.pinned; saveToStorage(); renderSidebar(); } }
+        function duplicateContext() { const o = snippets.find(s => s.id === rightClickedSnippetId); if (o) { const d = { ...o, id: Date.now().toString(), title: o.title + ' (Copy)' }; snippets.splice(snippets.indexOf(o) + 1, 0, d); saveToStorage(); loadSnippet(d.id); } }
+        function deleteContext() { if (confirm('Are you sure you want to delete this snippet?')) { snippets = snippets.filter(s => s.id !== rightClickedSnippetId); saveToStorage(); currentSnippetId === rightClickedSnippetId ? (snippets.length > 0 ? loadSnippet(snippets[0].id) : createNewSnippet()) : renderSidebar(); } }
+        function copyCode() { navigator.clipboard.writeText(codeEditor.value).then(() => { saveStatus.textContent = 'Copied! 📋'; saveStatus.style.opacity = 1; setTimeout(() => { saveStatus.textContent = 'Saved! ✨'; saveStatus.style.opacity = 0; }, 2000); }); }
+
+        init();
+    </script>
+</body>
+</html>
